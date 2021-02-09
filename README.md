@@ -1,6 +1,8 @@
 # Option Chain Stream
 
-Live streaming option chain for equity derivatives using Kite connect Websocket. 
+Live streaming option chain for equity derivatives using [Kite connect Websocket](https://kite.trade/docs/connect/v3/websocket/). 
+
+This package uses [Redis](https://redis.io/) as storage backend. It's used to store real time streaming websocket data and instruments detail i.e all strike details for trading equity derivatives. Combination of these data structure are used to create real-time option chain stream for any given instrument.
 
 # Installation
 ``` 
@@ -13,9 +15,11 @@ OptionStream = OptionChain("connect_api_key", "connect_secret_key", "connect_req
                     "option_trading_symbol", "option_expiry_date in yyyy-mm-dd format")
 # Eg: OptionChain('XXXXXX', 'XXXXXXX', 'XXXXXX', 
                     'ONGC', '2021-02-25')
+
 # Sync master instrument data to DB(redis)     
 # This sync is required only once daily at initial run             
 OptionStream.sync_instruments()
+
 # Stream option chain data in real-time
 StreamData = OptionStream.create_option_chain()
 for data in StreamData:
@@ -33,3 +37,13 @@ for data in StreamData:
 'change': -6.999999999999993, 'oi': 308000}, {'token': 24270082, 'symbol': 'ONGC21FEB91PE', 'last_price': 2.55, 'volume': 61600, 'change': -5.555555555555569, 
 'oi': 323400}, {'token': 24270338, 'symbol': 'ONGC21FEB92CE', 'last_price': 8.7, 'volume': 30800,....
 ```
+#### Response attributes
+
+| Field        | Type    | Detail                                                     |
+| -------------|:-------:|:-------------:                                             |
+| token        | string  | instrument_token for requested tradingsymbol               |
+| symbol       | string  | tradingsymbol of the instrument                            |
+| last_price   | float   | Current market price                                       |
+| volume       | int     | Volume traded for the day                                  |
+| change       | float   | Price change % w.r.t previous day close/LTP                |
+| oi           | float   | Open Interest for a options contract                       |
