@@ -13,6 +13,8 @@ import json
 class InstrumentDumpFetch():
     
     def __init__(self):
+        # Default redis port connection
+        # Port no and host be edited by user or will make both as acceptable argument in later release 
         self.conn = redis.StrictRedis(host='localhost', port=6379)
 
     def data_dump(self, symbol, instrument_data):
