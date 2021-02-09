@@ -2,17 +2,27 @@
 
 Live streaming option chain for equity derivatives using [Kite connect Websocket](https://kite.trade/docs/connect/v3/websocket/). 
 
-This package uses [Redis](https://redis.io/) as storage backend. It's used to store real time streaming websocket data and instruments detail i.e all strike details for trading equity derivatives. Combination of these data structure are used to create real-time option chain stream for any given instrument.
+This package uses [Redis](https://redis.io/) as storage backend. It's used to store real time streaming websocket data and instruments detail i.e all option strike details for contracts. Combination of these data structure are used to create real-time option chain stream for any given instrument.
 
-# Installation
+#### Installation
 ``` 
-git clone https://github.com/ranjanrak/OptionChainStream.git
+pip install optionchain-stream
 ```
-# Usage
+#### Request parameters
+
+| Field                | Type    | Detail                                                                 |
+| -------------        |:-------:|:-------------:                                                         |
+| api_key              | string  | Kite connect API key                                                   |
+| secret_key           | string  | Kite connect API secret                                                |
+| request_token        | string  | Kite connect one-time token obtained after the [login flow](https://kite.trade/docs/connect/v3/user/#login-flow)              |
+| option_symbol        | string  | Symbol of the instrument(eg: NIFTY, SBIN, ONGC, etc)                   |
+| option_expiry_date   | string  | Option expiry date in yyyy-mm-dd format(eg: '2021-02-25', '2021-04-29')|
+
+#### Usage
 ```
 from option_chain import OptionChain
-OptionStream = OptionChain("connect_api_key", "connect_secret_key", "connect_request_token",
-                    "option_trading_symbol", "option_expiry_date in yyyy-mm-dd format")
+OptionStream = OptionChain("api_key", "secret_key", "request_token",
+                    "option_symbol", "option_expiry_date in yyyy-mm-dd format")
 # Eg: OptionChain('XXXXXX', 'XXXXXXX', 'XXXXXX', 
                     'ONGC', '2021-02-25')
 
@@ -26,6 +36,8 @@ for data in StreamData:
     print(data)
 ```
 #### Response
+Responses are JSON messages.
+
 ```
 ...., 'change': 54.09090909090908, 'oi': 7700},{'token': 24268034, 'symbol': 'ONGC21FEB87PE', 'last_price': 1.5, 'volume': 61600, 'change': 0.0, 'oi': 400400}, 
 {'token': 24268290, 'symbol': 'ONGC21FEB88CE', 'last_price': 10.6, 'volume': 0, 'change': -12.033195020746897, 'oi': 15400}, {'token': 24268546, 'symbol': 
