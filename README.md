@@ -6,7 +6,7 @@ This package uses [Redis](https://redis.io/) as storage backend. Here Redis is u
 
 #### Installation
 ``` 
-pip install optionchain-stream
+pip install optionchain_stream
 ```
 #### Request parameters
 
