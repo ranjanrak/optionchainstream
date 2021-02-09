@@ -20,7 +20,7 @@ pip install optionchain-stream
 
 #### Usage
 ```
-from option_chain import OptionChain
+from optionchain_stream import OptionChain
 OptionStream = OptionChain("api_key", "secret_key", "request_token",
                     "option_symbol", "option_expiry_date in yyyy-mm-dd format")
 # Eg: OptionChain('XXXXXX', 'XXXXXXX', 'XXXXXX', 
