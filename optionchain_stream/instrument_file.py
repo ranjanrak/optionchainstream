@@ -10,7 +10,7 @@ and store it in Redis
 from kiteconnect import KiteConnect
 import requests, os
 import pandas as pd
-from redis_instrument import InstrumentDumpFetch
+from optionchain_stream.redis_instrument import InstrumentDumpFetch
 
 class InstrumentMaster:
     def __init__(self, api_key):

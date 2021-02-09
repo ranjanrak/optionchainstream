@@ -9,7 +9,7 @@ for requested option symbol
 import json, logging, asyncio, time
 from multiprocessing import Process, Queue
 from kiteconnect import KiteConnect, KiteTicker
-from instrument_file import InstrumentMaster
+from optionchain_stream.instrument_file import InstrumentMaster
 
 
 class WebsocketClient:

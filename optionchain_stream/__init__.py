@@ -6,6 +6,6 @@
 Python client for streaming option chain using Kite connect Websocket
 """
 
-from .option_chain import OptionChain
+from optionchain_stream.option_chain import OptionChain
 
 __all__ = ["OptionChain"]

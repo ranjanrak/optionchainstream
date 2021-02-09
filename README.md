@@ -2,7 +2,7 @@
 
 Live streaming option chain for equity derivatives using [Kite connect Websocket](https://kite.trade/docs/connect/v3/websocket/). 
 
-This package uses [Redis](https://redis.io/) as storage backend. It's used to store real time streaming websocket data and instruments detail i.e all option strike details for contracts. Combination of these data structure are used to create real-time option chain stream for any given instrument.
+This package uses [Redis](https://redis.io/) as storage backend. Here Redis is used to store real time streaming websocket data and instruments detail i.e all option strike details for contracts. Combination of these data structure are used to create real-time option chain stream for any given instrument.
 
 #### Installation
 ``` 

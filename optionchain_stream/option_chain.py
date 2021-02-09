@@ -2,8 +2,8 @@
 @author: rakeshr
 """
 import time
-from websocket import WebsocketClient
-from instrument_file import InstrumentMaster
+from optionchain_stream.websocket import WebsocketClient
+from optionchain_stream.instrument_file import InstrumentMaster
 
 class OptionChain():
     """

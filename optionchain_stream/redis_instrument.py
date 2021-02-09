@@ -6,7 +6,6 @@ Dump all exchange instruments/contract data to Redis
 Retrive strike and instrument token detail from redis for each symbol search
 """
 
-import datetime
 import redis
 import json
 
