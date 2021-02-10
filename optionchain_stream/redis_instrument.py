@@ -53,9 +53,9 @@ class InstrumentDumpFetch():
         Param token:(integer) - Instrument token
         Param optionData:(dict) - Complete data dump for specific option symbol
         """
-        optionChainKey = {'symbol':tradingsymbol, 'token':token}
+        optionChainKey = '{}:{}'.format(tradingsymbol, token)
         try:
-            self.conn.set(json.dumps(optionChainKey), json.dumps(optionData))
+            self.conn.set(optionChainKey, json.dumps(optionData))
         except Exception as e:
             raise Exception('Error - {}'.format(e))
 
@@ -65,7 +65,7 @@ class InstrumentDumpFetch():
         Param symbol:(string) - Option contract symbol
         Param token:(integer) - Instrument token
         """
-        optionContractKey = json.dumps({'symbol':tradingsymbol, 'token':token})
+        optionContractKey = '{}:{}'.format(tradingsymbol, token)
         try:
             token_data = json.loads(self.conn.get(optionContractKey))
         except Exception as e:
