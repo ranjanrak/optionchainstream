@@ -33,7 +33,7 @@ class InstrumentMaster:
         # Dump token:{symbol,strike} data to redis
         for contract in instruments:
             token_detail = {'symbol':contract['tradingsymbol'], 'strike':contract['strike'],
-                            'type':contract['instrument_type']}
+                            'type':contract['instrument_type'], 'name':contract['name']}
             self.redis_db.data_dump(contract['instrument_token'], token_detail)
 
         # Download and read F&O enabled list of contract

@@ -23,6 +23,8 @@ class WebsocketClient:
         self.instrumentClass = InstrumentMaster(api_key)
         self.token_list = self.instrumentClass.fetch_contract(self.symbol, str(self.expiry))
         self.q = Queue()
+        # Set access_token for Quote API call
+        self.kite.set_access_token(self.data["access_token"])
 
     def form_option_chain(self, q):
         """
@@ -39,9 +41,22 @@ class WebsocketClient:
         """   
         for tick in ticks:
             contract_detail = self.instrumentClass.fetch_token_detail(tick['instrument_token'])
+            expiry_date = datetime.datetime.strptime(self.expiry, '%Y-%m-%d')
+            # calculate time difference from contract expiry
+            time_difference = (expiry_date - datetime.datetime.today()).days
+            contract = 'NSE:{}'.format(contract_detail['name'])
+            # fetch underlying contract ltp from Quote API call
+            eq_detail = self.kite.quote([contract])
+            # Calculate IV
+            if contract_detail['type'] == 'CE':
+                iv = implied_volatility('CALL', eq_detail[contract]['last_price'], contract_detail['strike'], time_difference,
+                                             0.04, tick['last_price'])
+            elif contract_detail['type'] == 'PE':
+                iv = implied_volatility('PUT', eq_detail[contract]['last_price'], contract_detail['strike'], time_difference,
+                                             0.04, tick['last_price'])
             optionData = {'token':tick['instrument_token'], 'symbol':contract_detail['symbol'], 
                                 'last_price':tick['last_price'], 'volume':tick['volume'], 'change':tick['change'],
-                                'oi':tick['oi']}
+                                'oi':tick['oi'], 'iv':iv}
             # Store each tick to redis with symbol and token as key pair
             self.instrumentClass.store_option_data(contract_detail['symbol'], tick['instrument_token'], optionData)
 
