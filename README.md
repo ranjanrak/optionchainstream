@@ -61,3 +61,4 @@ Responses are JSON messages.
 | volume       | int     | Volume traded for the day                                  |
 | change       | float   | Price change % w.r.t previous day close/LTP                |
 | oi           | float   | Open Interest for a options contract                       |
+| iv           | float   | Implied Volatility of the option contract                  |
