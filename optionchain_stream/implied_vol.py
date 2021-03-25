@@ -11,13 +11,14 @@ import numpy as np
 from scipy.stats import norm
 
 """
+Param defination:
 opt_type = 'CALL' or 'PUT'
 s = Spot Price
 k =  Strike Price
-t = Days to expiration
+t = Days to expiration in days
 rfr = Risk-free Rate(% to be divided by 100). Considering fix 0.04 here
 sigma = volatility
-div = Annual dividend rate. Defaulted to zero.
+div = Annual dividend rate. Default to zero.
 price = Known option price. Needed for implied_volatility function
 """
 
@@ -79,8 +80,10 @@ def option_vega(s, k, t, rfr, sigma, div=0):
 
 
 def implied_volatility(opt_type, s, k, t, rfr, price, div=0):
-    """implied volatility approximation using black and scholes"""
-    epsilon = 0.00000001
+    """implied volatility approximation using black and scholes calculation"""
+   
+    #Epsilon is generally defined as a small positive number
+    epsilon = 0.00000001 # measure of the dividend risk
     sigma = 1.0
 
     def black_scholes(opt_type, s, k, t, rfr, sigma, price, epsilon, div=0):
