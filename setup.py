@@ -5,7 +5,7 @@ README = open("README.md").read()
 
 setup(
     name="optionchain_stream",  
-    version="0.3",
+    version="0.4",
     author="Rakesh R",
     author_email="rrrakesh265@gmail.com",
     description="Python library for live streaming option chain using Kiteconnect Websocket",
