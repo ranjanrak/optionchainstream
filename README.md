@@ -16,16 +16,22 @@ pip install optionchain_stream
 | api_key              | string  | Kite connect API key                                                   |
 | secret_key           | string  | Kite connect API secret                                                |
 | request_token        | string  | Kite connect one-time token obtained after the [login flow](https://kite.trade/docs/connect/v3/user/#login-flow)              |
+| access_token         | string  | The authentication token obtained post the [login flow](https://kite.trade/docs/connect/v3/user/#login-flow) using request_token and secret_key
 | option_symbol        | string  | Symbol of the instrument(eg: NIFTY, SBIN, ONGC, etc)                   |
 | option_expiry_date   | string  | Option expiry date in yyyy-mm-dd format(eg: '2021-02-25', '2021-04-29')|
 
 #### Usage
 ```
 from optionchain_stream import OptionChain
-OptionStream = OptionChain("api_key", "secret_key", "request_token",
-                    "option_symbol", "option_expiry_date in yyyy-mm-dd format")
-# Eg: OptionChain('XXXXXX', 'XXXXXXX', 'XXXXXX', 
-                    'ONGC', '2021-02-25')
+OptionStream = OptionChain("option_symbol", "option_expiry_date in yyyy-mm-dd format", "api_key",
+                    "api_secret=None", "request_token=None", "access_token=None")
+
+# You can directly pass access_token from previous active session 
+Eg: OptionStream = OptionChain("ONGC", "2021-02-25", "your_api_key", access_token="XXXXXX")
+
+# Generate new session by passing api_secret and request_token
+Eg: OptionStream = OptionChain("ONGC", "2021-02-25", "your_api_key", api_secret="XXXXX",
+                    request_token="XXXXXX")
 
 # Sync master instrument data to DB(redis)     
 # This sync is required only once daily at initial run             

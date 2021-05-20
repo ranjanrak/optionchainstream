@@ -6,18 +6,16 @@ Websocket client that streams data of all strikes contract
 for requested option symbol 
 """
 
-import json, logging, asyncio, time
+import logging, time
 from multiprocessing import Process, Queue
-from kiteconnect import KiteConnect, KiteTicker
+from kiteconnect import KiteTicker
 from optionchain_stream.instrument_file import InstrumentMaster
 
 
 class WebsocketClient:
-    def __init__(self, api_key, api_secret, request_token, symbol, expiry):
-        # Create kite connect instance
-        self.kite = KiteConnect(api_key=api_key)
-        self.data = self.kite.generate_session(request_token, api_secret=api_secret)
-        self.kws = KiteTicker(api_key, self.data["access_token"], debug=True)
+    def __init__(self, symbol, expiry, api_key, acess_token):
+        # Create kite ticker instance
+        self.kws = KiteTicker(api_key, acess_token, debug=True)
         self.symbol = symbol
         self.expiry = expiry
         self.instrumentClass = InstrumentMaster(api_key)
