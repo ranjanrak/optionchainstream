@@ -13,13 +13,14 @@ from optionchain_stream.instrument_file import InstrumentMaster
 
 
 class WebsocketClient:
-    def __init__(self, symbol, expiry, api_key, acess_token):
+    def __init__(self, symbol, expiry, api_key, acess_token, underlying):
         # Create kite ticker instance
         self.kws = KiteTicker(api_key, acess_token, debug=True)
         self.symbol = symbol
         self.expiry = expiry
+        self.underlying = underlying
         self.instrumentClass = InstrumentMaster(api_key)
-        self.token_list = self.instrumentClass.fetch_contract(self.symbol, str(self.expiry))
+        self.token_list = self.instrumentClass.fetch_contract(self.symbol, str(self.expiry), self.underlying)
         self.q = Queue()
 
     def form_option_chain(self, q):
@@ -37,9 +38,15 @@ class WebsocketClient:
         """   
         for tick in ticks:
             contract_detail = self.instrumentClass.fetch_token_detail(tick['instrument_token'])
-            optionData = {'token':tick['instrument_token'], 'symbol':contract_detail['symbol'], 
-                                'last_price':tick['last_price'], 'volume':tick['volume'], 'change':tick['change'],
-                                'oi':tick['oi']}
+            # For EQ underlying instrument don't fetch OI and volume(for INDICES) value
+            if contract_detail['type'] == 'EQ':
+                optionData = {'token':tick['instrument_token'], 'symbol':contract_detail['symbol'], 
+                                    'last_price':tick['last_price'], 'change':tick['change']}
+            else:
+                optionData = {'token':tick['instrument_token'], 'symbol':contract_detail['symbol'], 
+                                    'last_price':tick['last_price'], 'volume':tick['volume'], 'change':tick['change'],
+                                    'oi':tick['oi']}
+
             # Store each tick to redis with symbol and token as key pair
             self.instrumentClass.store_option_data(contract_detail['symbol'], tick['instrument_token'], optionData)
 

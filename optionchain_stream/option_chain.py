@@ -9,13 +9,14 @@ class OptionChain():
     """
     Wrapper class to fetch option chain steaming data
     """
-    def __init__(self, symbol, expiry, api_key, api_secret=None, request_token=None, access_token=None):
+    def __init__(self, symbol, expiry, api_key, api_secret=None, request_token=None, access_token=None, underlying=False):
         self.symbol = symbol
         self.expiry = expiry
         self.api_key = api_key
         self.api_secret = api_secret
         self.request_token = request_token
         self.access_token = access_token
+        self.underlying = underlying
         self.instrumentClass = InstrumentMaster(self.api_key)
 
     def sync_instruments(self):
@@ -36,7 +37,7 @@ class OptionChain():
         elif self.access_token:
             self.access_token = self.access_token
 
-        self.socketClient = WebsocketClient(self.symbol, self.expiry, self.api_key, self.access_token)
+        self.socketClient = WebsocketClient(self.symbol, self.expiry, self.api_key, self.access_token, self.underlying)
         # create streaming websocket data
         self.socketClient.queue_callBacks()
         # Keep fetching streaming Queue

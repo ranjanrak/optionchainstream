@@ -26,10 +26,9 @@ class InstrumentMaster:
         dump it to redis
         """
         contractToken = {}
-        result = None
         # Fetch instrument file
         # Filter only F&O contracts
-        instruments = self.kite.instruments('NFO')
+        instruments = self.kite.instruments()
         # Dump token:{symbol,strike} data to redis
         for contract in instruments:
             token_detail = {'symbol':contract['tradingsymbol'], 'strike':contract['strike'],
@@ -43,30 +42,50 @@ class InstrumentMaster:
         # Filter only contract symbol from marketlot file
         fno_contract = pd.read_csv('fo_mktlots.csv')
         optionInstrument = []
+        underInstrument = []
         for index, row in fno_contract.iterrows():
-            optionInstrument.append(row['SYMBOL    '].rstrip())
+            underlying_name = row['UNDERLYING                          '].rstrip()
+            # Remove these suffix to match with kite instrument master
+            if 'LTD' in underlying_name:
+                underlying_name = underlying_name.replace('LTD', '')
+            elif 'LIMITED' in underlying_name:
+                underlying_name = underlying_name.replace('LIMITED', '')
+
+            optionInstrument.append({'symbol':row['SYMBOL    '].rstrip(), 
+                            'underlying':underlying_name.rstrip()})
         
         for optContract in optionInstrument:
             # Create list of strike price for specific symbol
-            contractToken[optContract] = []
+            contractToken[optContract['symbol']] = []
             for contract in instruments:
-                if contract['name'] == optContract and \
-                                contract['segment'] == 'NFO-OPT':
-                    contractToken[optContract].append({'strike':contract['strike'],
+                if ((contract['name'] == optContract['symbol'] or \
+                    contract['tradingsymbol'] == optContract['symbol'] or \
+                    contract['name'] == optContract['underlying']) and \
+                    (contract['segment'] == 'NFO-OPT' or 
+                    (contract['instrument_type'] == 'EQ' and contract['exchange'] == 'NSE'))):
+                        contractToken[optContract['symbol']].append({'strike':contract['strike'],
                         'type':contract['instrument_type'], 'expiry':str(contract['expiry']),
                         'token':contract['instrument_token']})
-            self.redis_db.data_dump(optContract, contractToken[optContract])
+            self.redis_db.data_dump(optContract['symbol'], contractToken[optContract['symbol']])
     
-    def fetch_contract(self, symbol, expiry):
+    def fetch_contract(self, symbol, expiry, underlying):
         """
         Fetch strike and token detail for requested symbol
         Param symbol:(string) - Option contract symbol
         """
         token_list = []
+        # Fetch all active opt and EQ contracts for requested symbol
         optionData = self.redis_db.symbol_data(symbol)
         for strike_detail in optionData:
-            if strike_detail['expiry'] == str(expiry):
-                token_list.append(strike_detail['token'])
+            # For underlying request fetch both EQ and option contracts
+            if underlying:
+                if strike_detail['expiry'] == str(expiry) or \
+                                strike_detail['type'] == 'EQ':
+                    token_list.append(strike_detail['token'])
+            else:
+                # Only fetch opt contracts
+                if strike_detail['expiry'] == str(expiry):
+                    token_list.append(strike_detail['token'])
         return token_list
     
     def fetch_token_detail(self, token):
