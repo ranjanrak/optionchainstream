@@ -19,12 +19,13 @@ pip install optionchain_stream
 | access_token         | string  | The authentication token obtained post the [login flow](https://kite.trade/docs/connect/v3/user/#login-flow) using request_token and secret_key
 | option_symbol        | string  | Symbol of the instrument(eg: NIFTY, SBIN, ONGC, etc)                   |
 | option_expiry_date   | string  | Option expiry date in yyyy-mm-dd format(eg: '2021-02-25', '2021-04-29')|
+| option_expiry_date   | string  | Option expiry date in yyyy-mm-dd format(eg: '2021-02-25', '2021-04-29')|
 
 #### Usage
 ```
 from optionchain_stream import OptionChain
 OptionStream = OptionChain("option_symbol", "option_expiry_date in yyyy-mm-dd format", "api_key",
-                    "api_secret=None", "request_token=None", "access_token=None")
+                    "api_secret=None", "request_token=None", "access_token=None", underlying=False)
 
 # You can directly pass access_token from previous active session 
 Eg: OptionStream = OptionChain("ONGC", "2021-02-25", "your_api_key", access_token="XXXXXX")
@@ -43,9 +44,16 @@ for data in StreamData:
     print(data)
 ```
 #### Response
-Responses are JSON messages.
+Responses are JSON messages.</br>
+For `underlying=True`, response contain underlying contract tick as well. Eg. for `option_symbol=ONGC`, underlying is `ONGC EQ NSE` contract:
 
 ```
+....{'token': 633601, 'symbol': 'ONGC', 'last_price': 112.35, 'change': 0.4470272686633885},....,
+{'token': 24268034, 'symbol': 'ONGC21FEB87PE', 'last_price': 1.5, 'volume': 61600, 'change': 0.0, 'oi': 400400},.....
+```
+By default, underlying contract tick is not sent.
+```
+
 ...., 'change': 54.09090909090908, 'oi': 7700},{'token': 24268034, 'symbol': 'ONGC21FEB87PE', 'last_price': 1.5, 'volume': 61600, 'change': 0.0, 'oi': 400400}, 
 {'token': 24268290, 'symbol': 'ONGC21FEB88CE', 'last_price': 10.6, 'volume': 0, 'change': -12.033195020746897, 'oi': 15400}, {'token': 24268546, 'symbol': 
 'ONGC21FEB88PE', 'last_price': 1.75, 'volume': 53900, 'change': 25.000000000000007, 'oi': 261800}, {'token': 24268802, 'symbol': 'ONGC21FEB89CE', 
