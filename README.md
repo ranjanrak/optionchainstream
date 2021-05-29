@@ -5,11 +5,11 @@ Live streaming option chain for equity derivatives using [Kite connect Websocket
 
 This package uses [Redis](https://redis.io/) as storage backend. Here Redis is used to store real time streaming websocket data and instruments detail i.e all option strike details for contracts. Combination of these data structure are used to create real-time option chain stream for any given instrument.
 
-#### Installation
+## Installation
 ``` 
 pip install optionchain_stream
 ```
-#### Request parameters
+## Request parameters
 
 | Field                | Type    | Detail                                                                 |
 | -------------        |:-------:|:-------------:                                                         |
@@ -19,9 +19,9 @@ pip install optionchain_stream
 | access_token         | string  | The authentication token obtained post the [login flow](https://kite.trade/docs/connect/v3/user/#login-flow) using request_token and secret_key
 | option_symbol        | string  | Symbol of the instrument(eg: NIFTY, SBIN, ONGC, etc)                   |
 | option_expiry_date   | string  | Option expiry date in yyyy-mm-dd format(eg: '2021-02-25', '2021-04-29')|
-| option_expiry_date   | string  | Option expiry date in yyyy-mm-dd format(eg: '2021-02-25', '2021-04-29')|
+| underlying           | boolean | Add NSE-EQ underlying stock in option stream for True input|
 
-#### Usage
+## Usage
 ```
 from optionchain_stream import OptionChain
 OptionStream = OptionChain("option_symbol", "option_expiry_date in yyyy-mm-dd format", "api_key",
@@ -34,6 +34,13 @@ Eg: OptionStream = OptionChain("ONGC", "2021-02-25", "your_api_key", access_toke
 Eg: OptionStream = OptionChain("ONGC", "2021-02-25", "your_api_key", api_secret="XXXXX",
                     request_token="XXXXXX")
 
+# You can fetch underlying stock tick as well in option chain, by sending optional param `underlying=True`
+Eg: OptionStream = OptionChain("ONGC", "2021-02-25", "your_api_key", access_token="XXXXXX", underlying=True)
+                  Or
+    OptionStream = OptionChain("ONGC", "2021-02-25", "your_api_key", api_secret="XXXXX",
+                    request_token="XXXXXX", underlying=True)
+
+
 # Sync master instrument data to DB(redis)     
 # This sync is required only once daily at initial run             
 OptionStream.sync_instruments()
@@ -43,15 +50,15 @@ StreamData = OptionStream.create_option_chain()
 for data in StreamData:
     print(data)
 ```
-#### Response
-Responses are JSON messages.</br>
-For `underlying=True`, response contain underlying contract tick as well. Eg. for `option_symbol=ONGC`, underlying is `ONGC EQ NSE` contract:
+## Response
+Responses are **JSON messages**.</br>
+1> For `underlying=True`, response contain underlying stock tick as well. Eg. for `option_symbol=ONGC`, underlying is `ONGC EQ NSE` contract:
 
 ```
 ....{'token': 633601, 'symbol': 'ONGC', 'last_price': 112.35, 'change': 0.4470272686633885},....,
 {'token': 24268034, 'symbol': 'ONGC21FEB87PE', 'last_price': 1.5, 'volume': 61600, 'change': 0.0, 'oi': 400400},.....
 ```
-By default, underlying contract tick is not sent.
+2> By default, option contracts are sent.
 ```
 
 ...., 'change': 54.09090909090908, 'oi': 7700},{'token': 24268034, 'symbol': 'ONGC21FEB87PE', 'last_price': 1.5, 'volume': 61600, 'change': 0.0, 'oi': 400400}, 
@@ -64,7 +71,7 @@ By default, underlying contract tick is not sent.
 'change': -6.999999999999993, 'oi': 308000}, {'token': 24270082, 'symbol': 'ONGC21FEB91PE', 'last_price': 2.55, 'volume': 61600, 'change': -5.555555555555569, 
 'oi': 323400}, {'token': 24270338, 'symbol': 'ONGC21FEB92CE', 'last_price': 8.7, 'volume': 30800,....
 ```
-#### Response attributes
+## Response attributes
 
 | Field        | Type    | Detail                                                     |
 | -------------|:-------:|:-------------:                                             |
