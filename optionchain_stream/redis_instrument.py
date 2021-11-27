@@ -1,6 +1,7 @@
 """
 @author: rakeshr
 """
+
 """
 Dump all exchange instruments/contract data to Redis
 Retrive strike and instrument token detail from redis for each symbol search
@@ -10,43 +11,63 @@ import redis
 import json
 
 class InstrumentDumpFetch():
-    
-    def __init__(self):
-        # Default redis port connection
-        # Port no and host be edited by user or will make both as acceptable argument in later release 
-        self.conn = redis.StrictRedis(host='localhost', port=6379)
 
-    def data_dump(self, symbol, instrument_data):
+    __conn = None
+
+    @staticmethod
+    def __init__():
+        # Default redis port connection
+        # Port no and host be edited by user or will make both as acceptable argument in later release
+        print('This is init')
+        if InstrumentDumpFetch.__conn != None:
+            raise Exception("This class is a singleton!")
+        else:
+            InstrumentDumpFetch.__conn = redis.Redis(host='localhost', port=6379)
+
+
+    @staticmethod
+    def get_conn():
+        if InstrumentDumpFetch.__conn == None:
+            InstrumentDumpFetch()
+        return InstrumentDumpFetch
+
+    @staticmethod
+    def data_dump(symbol, instrument_data):
         """
         Dump specific exchange complete instrument data
         Param symbol:(string) - Option contract symbol
-        Param instrument_data:(dictionary) - List of dict for specific option contract containing all strike, etc 
+        Param instrument_data:(dictionary) - List of dict for specific option contract containing all strike, etc
         """
-        self.conn.set(symbol, json.dumps(instrument_data))
 
-    def symbol_data(self, symbol):    
+        InstrumentDumpFetch.__conn.set(symbol, json.dumps(instrument_data))
+
+
+    @staticmethod
+    def symbol_data(symbol):
         """
         Return instrument detail for required symbol
         Param symbol:(string) - Option contract symbol to be searched
         """
         try:
-            contract_detail = json.loads(self.conn.get(symbol))
+            contract_detail = json.loads(InstrumentDumpFetch.__conn.get(symbol))
         except TypeError:
             raise Exception('Key not found - {}'.format(symbol))
         return contract_detail
 
-    def fetch_token(self, token):
+    @staticmethod
+    def fetch_token(token):
         """
         Fetch contract name for requested instrument token
-        Param token:(integer) - Instrument token 
+        Param token:(integer) - Instrument token
         """
         try:
-            token_instrument = json.loads(self.conn.get(token))
+            token_instrument = json.loads(InstrumentDumpFetch.__conn.get(token))
         except Exception as e:
             raise Exception('Error {}'.format(e))
         return token_instrument
 
-    def store_optiondata(self, tradingsymbol, token, optionData):
+    @staticmethod
+    def store_optiondata(tradingsymbol, token, optionData):
         """
         Store option chain data for requested symbol
         Param symbol:(string) - Option contract symbol
@@ -55,11 +76,12 @@ class InstrumentDumpFetch():
         """
         optionChainKey = '{}:{}'.format(tradingsymbol, token)
         try:
-            self.conn.set(optionChainKey, json.dumps(optionData))
+            InstrumentDumpFetch.__conn.set(optionChainKey, json.dumps(optionData))
         except Exception as e:
             raise Exception('Error - {}'.format(e))
 
-    def fetch_option_data(self, tradingsymbol, token):
+    @staticmethod
+    def fetch_option_data(tradingsymbol, token):
         """
         Fetch stored option data
         Param symbol:(string) - Option contract symbol
@@ -67,7 +89,7 @@ class InstrumentDumpFetch():
         """
         optionContractKey = '{}:{}'.format(tradingsymbol, token)
         try:
-            token_data = json.loads(self.conn.get(optionContractKey))
+            token_data = json.loads(InstrumentDumpFetch.__conn.get(optionContractKey))
         except Exception as e:
             raise Exception('Error - {}'.format(e))
         return token_data

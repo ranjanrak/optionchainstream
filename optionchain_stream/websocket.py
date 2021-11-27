@@ -7,13 +7,15 @@ for requested option symbol
 """
 
 import logging, time
-from multiprocessing import Process, Queue
+#from multiprocessing import Process, Queue, freeze_support
 from kiteconnect import KiteTicker
 from optionchain_stream.instrument_file import InstrumentMaster
+import multiprocessing as mp
 
 
 class WebsocketClient:
     def __init__(self, symbol, expiry, api_key, acess_token, underlying):
+        mp.freeze_support()
         # Create kite ticker instance
         self.kws = KiteTicker(api_key, acess_token, debug=True)
         self.symbol = symbol
@@ -21,7 +23,7 @@ class WebsocketClient:
         self.underlying = underlying
         self.instrumentClass = InstrumentMaster(api_key)
         self.token_list = self.instrumentClass.fetch_contract(self.symbol, str(self.expiry), self.underlying)
-        self.q = Queue()
+        self.q = mp.Queue()
 
     def form_option_chain(self, q):
         """
@@ -29,23 +31,22 @@ class WebsocketClient:
         """
         while 1:
             complete_option_data = self.instrumentClass.generate_optionChain(self.token_list)
-            # Store queue data 
             q.put(complete_option_data)
 
     def on_ticks(self, ws, ticks):
         """
         Push each tick to DB
-        """   
+        """
         for tick in ticks:
             contract_detail = self.instrumentClass.fetch_token_detail(tick['instrument_token'])
             # For EQ underlying instrument don't fetch OI and volume(for INDICES) value
             if contract_detail['type'] == 'EQ':
-                optionData = {'token':tick['instrument_token'], 'symbol':contract_detail['symbol'], 
-                                    'last_price':tick['last_price'], 'change':tick['change']}
+                optionData = {'token': tick['instrument_token'], 'symbol': contract_detail['symbol'],
+                              'last_price': tick['last_price'], 'change': tick['change']}
             else:
-                optionData = {'token':tick['instrument_token'], 'symbol':contract_detail['symbol'], 
-                                    'last_price':tick['last_price'], 'volume':tick['volume'], 'change':tick['change'],
-                                    'oi':tick['oi']}
+                optionData = {'token': tick['instrument_token'], 'symbol': contract_detail['symbol'],
+                              'last_price': tick['last_price'], 'volume': tick['volume'], 'change': tick['change'],
+                              'oi': tick['oi']}
 
             # Store each tick to redis with symbol and token as key pair
             self.instrumentClass.store_option_data(contract_detail['symbol'], tick['instrument_token'], optionData)
@@ -65,7 +66,7 @@ class WebsocketClient:
 
     def on_reconnect(self, ws, attempt_count):
         logging.debug("Reconnecting the websocket: {}".format(attempt_count))
-    
+
     def assign_callBacks(self):
         # Assign all the callbacks
         self.kws.on_ticks = self.on_ticks
@@ -80,11 +81,14 @@ class WebsocketClient:
         """
         Wrapper around ticker callbacks with multiprocess Queue
         """
+        mp.set_start_method('spawn', force=True)
+        print('Queue Call backs')
+
         # Process to keep updating real time tick to DB
-        Process(target=self.assign_callBacks,).start()
+        mp.Process(target=self.assign_callBacks, args=()).start()
         # Delay to let intial instrument DB sync
         # For option chain to fetch value
         # Required only during initial run
         time.sleep(2)
         # Process to fetch option chain in real time from Redis
-        Process(target=self.form_option_chain,args=(self.q, )).start()
+        mp.Process(target=self.form_option_chain, args=(self.q,)).start()
