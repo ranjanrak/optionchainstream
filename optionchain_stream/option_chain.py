@@ -7,7 +7,7 @@ from optionchain_stream.instrument_file import InstrumentMaster
 
 class OptionChain():
     """
-    Wrapper class to fetch option chain steaming data
+    Wrapper class to fetch option chain streaming data
     """
     def __init__(self, symbol, expiry, api_key, api_secret=None, request_token=None, access_token=None, underlying=False):
         self.symbol = symbol
@@ -27,7 +27,7 @@ class OptionChain():
     
     def create_option_chain(self):
         """
-        Wrapper method to fetch sreaming option chain for requested symbol/expiry
+        Wrapper method to fetch streaming option chain for requested symbol/expiry
         """
         # Assign/generate access_token using request_token and api_secret
         if self.api_secret and self.request_token:
